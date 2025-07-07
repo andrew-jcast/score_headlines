@@ -1,0 +1,14 @@
+# local package
+-e .
+python-dotenv>=0.5.1
+
+# web scraping
+beautifulsoup4>=4.12.0
+requests>=2.31.0
+
+# machine learning
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.5.2 # to match the model's version
+joblib>=1.3.0
+sentence-transformers>=2.2.0
