@@ -57,11 +57,17 @@ deploy_headlines
   negative,Breaking: Major earthquake strikes coastal region
   neutral,City council meets to discuss budget proposal
 
-  Project Structure
+  Project directory overview:
+```
+├── data/
+│   ├── raw/                <- Place input headline files here
+│   └── processed/
+│       └── local/         <- Sentiment analysis results saved here
+├── models/
+│   └── svm.joblib         <- Pre-trained sentiment model
+├── score_headlines.py     <- Main CLI script
+└── requirements.txt       <- Python dependencies
+```
 
-  <pre> ``` ├── data/ │ ├── raw/ <- Place input headline files here │ └── processed/ │ └── local/ <- Sentiment analysis results saved here ├── models/ │ └── svm.joblib <- Pre-trained sentiment model ├── score_headlines.py <- Main CLI script └── requirements.txt <- Python dependencies ``` </pre>
-
-
---------
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
