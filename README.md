@@ -59,14 +59,7 @@ deploy_headlines
 
   Project Structure
 
-  ├── data/
-  │   ├── raw/                <- Place input headline files here
-  │   └── processed/
-  │       └── local/         <- Sentiment analysis results saved here
-  ├── models/
-  │   └── svm.joblib         <- Pre-trained sentiment model
-  ├── score_headlines.py     <- Main CLI script
-  └── requirements.txt       <- Python dependencies
+  <pre> ``` ├── data/ │ ├── raw/ <- Place input headline files here │ └── processed/ │ └── local/ <- Sentiment analysis results saved here ├── models/ │ └── svm.joblib <- Pre-trained sentiment model ├── score_headlines.py <- Main CLI script └── requirements.txt <- Python dependencies ``` </pre>
 
 
 --------
