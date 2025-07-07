@@ -19,7 +19,7 @@ deploy_headlines
   Usage
 
   Basic usage:
-  python score_headlines.py <input_file> <source>
+  python score_headlines.py <input_file>, <source>
 
   Example:
   python score_headlines.py todaysheadlines.txt nyt
