@@ -50,8 +50,8 @@ class HeadlineRequest(BaseModel):
     
 @app.post("/score_headlines")
 def score_headlines(request: Request, payload: HeadlineRequest) -> Dict[str, List]:
-    headlines = request.headlines
-    return_ids = request.return_ids
+    headlines = payload.headlines
+    return_ids = payload.return_ids
 
     logger.info(f"Received request from {request.client.host} with {len(payload.headlines)} headline(s).")
 
