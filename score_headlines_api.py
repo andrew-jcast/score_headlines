@@ -6,6 +6,7 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 import os
 import uvicorn
+import hashlib
 
 
 svm_model = joblib.load("models/svm.joblib")
@@ -16,21 +17,40 @@ if not os.path.isdir(model_path):
 
 embedding_model = SentenceTransformer(model_path)
 
+def generate_headline_id(text: str) -> str:
+    normalized = text.lower().strip()
+    return hashlib.blake2b(normalized.encode("utf-8"), digest_size=10).hexdigest
+
 app = FastAPI()
+
+@app.get('/status')
+def status():
+    d = {'status': 'OK'}
+    return d
 
 class HeadlineRequest(BaseModel):
     headlines: List[str]
-
-@app.post("/predict")
-def predict_sentiment(request: HeadlineRequest):
-    if not request.headlines:
+    return_ids: bool = False
+    
+@app.post("/score_headlines")
+def score_headlines(request: HeadlineRequest) -> Dict[str, List]:
+    headlines = request.headlines
+    return_ids = request.return_id
+    if not headlines:
         raise HTTPException(status_code=400, detail="No headlines provided.")
-
-    embeddings = embedding_model.encode(request.headlines)
+    
+    # Generate embeddings and predictions
+    embeddings = embedding_model.encode(headlines)
     preds = svm_model.predict(embeddings)
-    return {"predictions": preds.tolist()}
 
-import uvicorn
-
+    if return_ids:
+        results = [
+            {"id": generate_headline_id(text), "label": label}
+            for text, label in zip(headlines, preds)
+        ]
+        return {"results": results}
+    else:
+        return {"labels": preds.tolist()}
+    
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8001)
