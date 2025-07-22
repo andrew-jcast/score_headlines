@@ -76,5 +76,5 @@ def score_headlines(request: Request, payload: HeadlineRequest) -> Dict[str, Lis
         return {"labels": preds.tolist()}
     
 if __name__ == "__main__":
-    logger.info("Starting FastAPI app on port 8001")
-    uvicorn.run("score_headlines_api:app", host="0.0.0.0", port=8001)
+    logger.info("Starting FastAPI app on port 8002")
+    uvicorn.run("score_headlines_api:app", host="0.0.0.0", port=8002)
