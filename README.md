@@ -1,211 +1,133 @@
-deploy_headlines
-==============================
+# Headline Sentiment Analyzer
 
-  # Headline Sentiment Analyzer
+A comprehensive sentiment analysis tool for news headlines with multiple interfaces: command-line, REST API, and web application.
 
-  A command-line tool for analyzing sentiment of news headlines using machine learning.
+## Overview
 
-  ## Overview
+This tool processes news headlines and predicts their sentiment (Optimistic, Pessimistic, or Neutral) using a pre-trained SVM model with sentence embeddings. It offers three ways to interact with the sentiment analysis:
 
-  This tool processes news headlines from text files and predicts their sentiment (positive, negative, or neutral) using a
-  pre-trained SVM model with sentence embeddings.
+1. **Command-line interface** (`score_headlines.py`) - Batch processing from files
+2. **REST API** (`score_headlines_api.py`) - Programmatic access via HTTP endpoints  
+3. **Web application** (`streamlit_app.py`) - Interactive user interface
 
-  ## Installation
+## Installation
 
-  ```bash
-  pip install -r requirements.txt
-  ```
+```bash
+pip install -r requirements.txt
+```
 
-  Usage
+## Usage
 
-  Basic usage:
-  `python score_headlines.py <input_file>, <source>`
+### 1. Web Application
 
-  Example:
-  `python score_headlines.py todaysheadlines.txt nyt`
+Start the Streamlit web interface for interactive sentiment analysis:
 
-  Arguments
+```bash
+streamlit run streamlit_app.py
+```
 
-  - input_file: Name of the text file containing headlines (must be placed in data/raw/ directory)
-  - source: News source identifier (e.g., 'nyt', 'chicagotribune')
+Features:
+- Interactive headline input (paste, type, or upload files)
+- Real-time sentiment scoring with caching
+- Visual sentiment distribution charts
+- Export results to CSV
+- Editable headline preview
 
-  Optional Arguments
+### 2. Command Line Interface
 
-  - --model-path: Path to the trained SVM model (default: models/svm.joblib)
-  - --output-dir: Directory to save results (default: data/processed/local)
-  - --no-save: Display results without saving to file
+Batch process headlines from text files:
 
-  Input Format
+```bash
+python score_headlines.py <input_file> <source>
+```
 
-  Place your headline files in the data/raw/ directory. Files must:
-  - Be in .txt format
-  - Contain one headline per line
-  - Use UTF-8 encoding
+**Example:**
+```bash
+python score_headlines.py todaysheadlines.txt nyt
+```
 
-  Example file structure:
-  data/raw/todaysheadlines.txt
+**Arguments:**
+- `input_file`: Text file name (place in `data/raw/` directory)
+- `source`: News source identifier (e.g., 'nyt', 'chicagotribune')
 
-  Output
+**Optional Arguments:**
+- `--model-path`: Path to SVM model (default: `models/svm.joblib`)
+- `--output-dir`: Results directory (default: `data/processed/local`)
+- `--no-save`: Display results without saving
 
-  The tool generates:
-  - Sentiment predictions for each headline
-  - Summary statistics showing sentiment distribution
-  - Timestamped output file: headline_scores_<source>_<timestamp>.txt
+**Input Format:**
+- Place files in `data/raw/` directory
+- Use `.txt` format with one headline per line
+- UTF-8 encoding required
 
-  Output format (CSV-style):
-  positive,Markets surge on strong earnings reports
-  negative,Breaking: Major earthquake strikes coastal region
-  neutral,City council meets to discuss budget proposal
+### 3. REST API
 
-  # Headline Sentiment Analyzer - API
+Start the API server for programmatic access:
 
-  ## Overview
+```bash
+python score_headlines_api.py
+```
 
-  The **Headline Sentiment Analyzer** provides a RESTful API for real-time sentiment analysis of headlines. Built with **FastAPI**, it supports batch processing and optional unique ID generation for each headline.
+The API runs at `http://localhost:8002` with endpoints:
 
-  ---
+#### `GET /status`
+Health check endpoint to verify the API is running.
 
-  ## Starting the API
+#### `POST /score_headlines`
+Analyzes sentiment for headlines.
 
-  ```
-  python score_headlines_api.py
-  ```
+**Request:**
+```json
+{
+  "headlines": ["array of headline strings"],
+  "return_ids": false
+}
+```
 
-  The API will start at [http://localhost:8001](http://localhost:8001) by default.
+**Response:**
+```json
+{
+  "labels": ["Optimistic", "Pessimistic", "Neutral"]
+}
+```
 
-  ---
+## Output Format
 
-  ## Endpoints
+All interfaces return sentiment predictions as:
+- **Optimistic**: Positive sentiment headlines
+- **Pessimistic**: Negative sentiment headlines  
+- **Neutral**: Neutral sentiment headlines
 
-  ### `GET /status`
+CLI output saves to timestamped files: `headline_scores_<source>_<timestamp>.txt`
 
-  Health check endpoint to verify the API is running.
+## Project Structure
 
-  **Response:**
-  ```json
-  {
-    "status": "OK"
-  }
-  ```
-
-  ---
-
-  ### `POST /score_headlines`
-
-  Analyzes sentiment for one or more headlines.
-
-  **Request Body:**
-  ```json
-  {
-    "headlines": ["array of headline strings"],
-    "return_ids": false
-  }
-  ```
-
-  **Parameters:**
-  - `headlines` (required): List of headline strings to analyze  
-  - `return_ids` (optional): If true, returns unique IDs for each headline
-
-  **Response (with `return_ids=false`):**
-  ```json
-  {
-    "labels": ["Optimistic", "Pessimistic", "Neutral"]
-  }
-  ```
-
-  **Response (with `return_ids=true`):**
-  ```json
-  {
-    "results": [
-      {
-        "id": "eac3c48b39894338157b",
-        "label": "Optimistic"
-      },
-      {
-        "id": "182d3ee7fdae04e43bd2",
-        "label": "Pessimistic"
-      }
-    ]
-  }
-  ```
-
-  ---
-
-  ## Usage Examples
-
-  ### Python (with `requests`)
-
-  ```python
-  import requests
-
-  # Score headlines without IDs
-  response = requests.post(
-      "http://localhost:8001/score_headlines",
-      json={
-          "headlines": [
-              "Markets surge on strong earnings",
-              "Economic uncertainty looms ahead"
-          ]
-      }
-  )
-  print(response.json())
-  # Output: {"labels": ["Optimistic", "Pessimistic"]}
-
-  # Score headlines with unique IDs
-  response = requests.post(
-      "http://localhost:8001/score_headlines",
-      json={
-          "headlines": ["Tech stocks rally"],
-          "return_ids": True
-      }
-  )
-  print(response.json())
-  # Output: {"results": [{"id": "a1b2c3d4e5", "label": "Optimistic"}]}
-  ```
-
-  ---
-
-  ### cURL
-
-  ```bash
-  # Check API status
-  curl http://localhost:8001/status
-
-  # Score headlines
-  curl -X POST http://localhost:8001/score_headlines \
-    -H "Content-Type: application/json" \
-    -d '{"headlines": ["Breaking news: Major discovery announced"]}'
-  ```
-
-  ---
-
-  ## Error Handling
-
-  The API returns appropriate HTTP status codes:
-  - **400 Bad Request**: Empty headline list  
-  - **500 Internal Server Error**: Model prediction failure
-
-  ---
-
-  ## Technical Details
-
-  - Uses pre-trained SVM model with sentence embeddings (`all-MiniLM-L6-v2`)  
-  - Headline IDs are generated using **BLAKE2b** hash (when requested)  
-  - Includes request logging for monitoring  
-  - Model loading is **cached** for performance
-
-  Project directory overview:
 ```
 ├── data/
-│   ├── raw/                <- Place input headline files here
-│   └── processed/
-│       └── local/         <- Sentiment analysis results saved here
+│   ├── raw/                  <- Input headline files (.txt)
+│   └── processed/            <- Analysis results
+│       ├── local/            <- CLI output files
+│       └── scraped/          <- Web scraped headlines
+├── development/              <- Development scripts
+│   ├── libraries/            <- Utility modules
+│   └── scrape_score_headlines.py
 ├── models/
-│   └── svm.joblib         <- Pre-trained sentiment model
-├── score_headlines.py     <- Main CLI script
-├── score_headlines_api.py <- Main API hosting script
-└── requirements.txt       <- Python dependencies
+│   └── svm.joblib           <- Pre-trained SVM sentiment model
+├── notebooks/               <- Jupyter notebooks for development
+├── score_headlines.py       <- Command-line interface
+├── score_headlines_api.py   <- REST API server
+├── streamlit_app.py         <- Web application
+└── requirements.txt         <- Python dependencies
 ```
 
+## Technical Details
 
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+- **Model**: Pre-trained SVM with sentence embeddings (all-MiniLM-L6-v2)
+- **Sentiment Labels**: Optimistic, Pessimistic, Neutral
+- **Caching**: Client-side caching in web app for performance
+- **ID Generation**: BLAKE2b hashing for unique headline identifiers
+- **Logging**: Request monitoring and error tracking
+
+---
+
+<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>.</small></p>

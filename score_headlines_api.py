@@ -22,8 +22,14 @@ logger = logging.getLogger(__name__)
 def get_embedding_model() -> SentenceTransformer:
     path = "/opt/huggingface_models/all-MiniLM-L6-v2"
     if not os.path.isdir(path):
-        raise RuntimeError(f"Model path '{path}' not found.")
-    return SentenceTransformer(path)
+        try:
+            # Download from Hugging Face
+            model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+            return model
+        except Exception as e:
+            raise RuntimeError(f"Failed to download model: {e}")
+    else:
+        return SentenceTransformer(path)
 
 @lru_cache()
 def get_svm_model():
